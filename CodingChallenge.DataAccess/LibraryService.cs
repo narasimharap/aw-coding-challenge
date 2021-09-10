@@ -25,12 +25,59 @@ namespace CodingChallenge.DataAccess
         public IEnumerable<Movie> SearchMovies(string title, int? skip = null, int? take = null, string sortColumn = null, SortDirection sortDirection = SortDirection.Ascending)
         {
             var movies = GetMovies().Where(s => s.Title.Contains(title));
+            if (sortColumn == "ID")
+            {
+                if (sortDirection == SortDirection.Descending)
+                    movies = movies.OrderByDescending(m => m.ID);
+                else
+                    movies = movies.OrderBy(m => m.ID);
+            }
+
+            if (sortColumn == "Year")
+            {
+                if (sortDirection == SortDirection.Descending)
+                    movies = movies.OrderByDescending(m => m.Year);
+                else
+                    movies = movies.OrderBy(m => m.Year);
+            }
+
+
+            if (sortColumn == "Rating")
+            {
+                if (sortDirection == SortDirection.Descending)
+                    movies = movies.OrderByDescending(m => m.Rating);
+                else
+                    movies = movies.OrderBy(m => m.Rating);
+            }
+
+            if (sortColumn == "Title")
+            {
+                if (sortDirection == SortDirection.Descending)
+                    movies = movies.OrderByDescending(m => ReplaceArticle(m.Title));
+                else
+                    movies = movies.OrderBy(m => ReplaceArticle(m.Title));
+            }
+
+
             if (skip.HasValue && take.HasValue)
             {
                 movies = movies.Skip(skip.Value).Take(take.Value);
             }
+            return movies.Distinct(new TitleComparer()).ToList();
+        }
+        private string ReplaceArticle(string input)
+        {
+            string[] noise = new string[] { "the", "an", "a" };
 
-            return movies.ToList();
+            foreach (string n in noise)
+            {
+                if (input.ToLower().StartsWith(n))
+                {
+                    return input.Substring(n.Length).Trim();
+                }
+            }
+
+            return input;
         }
     }
 }
